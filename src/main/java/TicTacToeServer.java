@@ -12,18 +12,18 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class TicTacToeServer extends JFrame {
-    private final String[] board = new String[9]; // Tabuleiro do jogo
-    private final JTextArea outputArea; // Para exibir mensagens no servidor
-    private final Player[] players; // Array de jogadores
-    private ServerSocket server; // Socket do servidor para aceitar conexões
-    private int currentPlayer; // Mantém o controle do jogador atual
-    private final static int PLAYER_X = 0; // Constante para o primeiro jogador
-    private final static int PLAYER_O = 1; // Constante para o segundo jogador
-    private final static String[] MARKS = {"X", "O"}; // Marcas dos jogadores
-    private final ExecutorService runGame; // Para executar os jogadores
-    private final Lock gameLock; // Para travar o jogo durante atualizações
-    private final Condition otherPlayerConnected; // Condição para esperar o outro jogador
-    private final Condition otherPlayerTurn; // Condição para esperar o turno do outro jogador
+    private final String[] board = new String[9];
+    private final JTextArea outputArea;
+    private final Player[] players;
+    private ServerSocket server;
+    private int currentPlayer;
+    private final static int PLAYER_X = 0;
+    private final static int PLAYER_O = 1;
+    private final static String[] MARKS = {"X", "O"};
+    private final ExecutorService runGame;
+    private final Lock gameLock;
+    private final Condition otherPlayerConnected;
+    private final Condition otherPlayerTurn;
 
     public TicTacToeServer() {
         super("Tic-Tac-Toe Server");
@@ -55,7 +55,7 @@ public class TicTacToeServer extends JFrame {
                     players[i] = new Player(server.accept(), i);
                     runGame.execute(players[i]);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    e.getCause();
                     System.exit(1);
                 }
             }
@@ -69,26 +69,21 @@ public class TicTacToeServer extends JFrame {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            e.getCause();
             System.exit(1);
         }
     }
 
-    // *** INÍCIO DA LÓGICA PRINCIPAL DA TAREFA ***
     public boolean isGameWon() {
-        // Checa linhas
+
         for (int i = 0; i < 9; i += 3) {
             if (!board[i].isEmpty() && board[i].equals(board[i + 1]) && board[i].equals(board[i + 2])) return true;
         }
-        // Checa colunas
         for (int i = 0; i < 3; ++i) {
             if (!board[i].isEmpty() && board[i].equals(board[i + 3]) && board[i].equals(board[i + 6])) return true;
         }
-        // Checa diagonais
         if (!board[0].isEmpty() && board[0].equals(board[4]) && board[0].equals(board[8])) return true;
-        if (!board[2].isEmpty() && board[2].equals(board[4]) && board[2].equals(board[6])) return true;
-
-        return false;
+        return !board[2].isEmpty() && board[2].equals(board[4]) && board[2].equals(board[6]);
     }
 
     public boolean isBoardFull() {
@@ -122,7 +117,6 @@ public class TicTacToeServer extends JFrame {
         }
         return false;
     }
-    // *** FIM DA LÓGICA PRINCIPAL DA TAREFA ***
 
     private class Player implements Runnable {
         private final Socket connection;
@@ -143,7 +137,7 @@ public class TicTacToeServer extends JFrame {
                 input = new ObjectInputStream(connection.getInputStream());
                 outputArea.append("Player " + mark + " connected\n");
             } catch (IOException e) {
-                e.printStackTrace();
+                e.getCause();
             }
         }
 
@@ -153,7 +147,7 @@ public class TicTacToeServer extends JFrame {
                 output.writeObject(location);
                 output.flush();
             } catch (IOException e) {
-                e.printStackTrace();
+                e.getCause();
             }
         }
 
@@ -174,7 +168,7 @@ public class TicTacToeServer extends JFrame {
                             otherPlayerConnected.await();
                         }
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        e.getCause();
                     } finally {
                         gameLock.unlock();
                     }
@@ -210,12 +204,12 @@ public class TicTacToeServer extends JFrame {
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+                e.getCause();
             } finally {
                 try {
                     connection.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    e.getCause();
                 }
             }
         }
